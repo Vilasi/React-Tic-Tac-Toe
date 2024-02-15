@@ -6,15 +6,24 @@ import './Player.css';
 export default function Player({ name, playerSymbol }) {
   const [playerName, setPlayerName] = useState(name);
   const [inputDisplay, setInputDisplay] = useState('hidden');
+  const [isEditing, setIsEditing] = useState(false);
 
-  function handleClick() {
+  function handleClick(e) {
+    console.log(e.target.textContent);
     setInputDisplay('text');
+    setIsEditing(true);
+
+    if (e.target.textContent === 'Save') {
+      setInputDisplay('hidden');
+      setIsEditing(false);
+    }
   }
 
   function handleSubmit(e) {
     if (e.key === 'Enter') {
-      console.log(e.value);
+      //   console.log(e.value);
       setInputDisplay('hidden');
+      setIsEditing(false);
     }
   }
 
@@ -22,23 +31,23 @@ export default function Player({ name, playerSymbol }) {
     setPlayerName(e.target.value);
   }
 
-  //? Derive display
-  //   let inputDisplay = 'hidden';
-  //   if (playerName !== name) {
-  //     inputDisplay = 'text';
-  //   }
+  //   let playerNameDisplay = <span className="player-name">{playerName}</span>;
+
   return (
     <li>
       <span className="player">
-        <span className="player-name">{playerName}</span>
+        {!isEditing ? (
+          <span className="player-name">{playerName}</span>
+        ) : (
+          <input
+            onChange={handleChange}
+            onKeyDown={handleSubmit}
+            type={inputDisplay}
+          />
+        )}
         <span className="player-symbol">{playerSymbol}</span>
-        <input
-          onChange={handleChange}
-          onKeyDown={handleSubmit}
-          type={inputDisplay}
-        />
       </span>
-      <button onClick={handleClick}>Edit</button>
+      <button onClick={handleClick}>{!isEditing ? 'Edit' : 'Save'}</button>
     </li>
   );
 }
