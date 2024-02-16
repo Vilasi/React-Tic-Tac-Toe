@@ -5,24 +5,20 @@ import './Player.css';
 
 export default function Player({ name, playerSymbol }) {
   const [playerName, setPlayerName] = useState(name);
-  const [inputDisplay, setInputDisplay] = useState('hidden');
   const [isEditing, setIsEditing] = useState(false);
 
-  function handleClick(e) {
-    console.log(e.target.textContent);
-    setInputDisplay('text');
-    setIsEditing(true);
-
-    if (e.target.textContent === 'Save') {
-      setInputDisplay('hidden');
-      setIsEditing(false);
-    }
+  //? Edit Button Functionality
+  function handleEditClick(e) {
+    //Here, we're updating the state based on the old state
+    //--It is a best practice to always do this within a callback function
+    //--React will call this callback function and get the original state value
+    //----**This is a good idea because useState is async**
+    setIsEditing(() => !isEditing);
   }
 
+  //? Input Enter Key Submit functionality
   function handleSubmit(e) {
     if (e.key === 'Enter') {
-      //   console.log(e.value);
-      setInputDisplay('hidden');
       setIsEditing(false);
     }
   }
@@ -30,8 +26,6 @@ export default function Player({ name, playerSymbol }) {
   function handleChange(e) {
     setPlayerName(e.target.value);
   }
-
-  //   let playerNameDisplay = <span className="player-name">{playerName}</span>;
 
   return (
     <li>
@@ -42,12 +36,15 @@ export default function Player({ name, playerSymbol }) {
           <input
             onChange={handleChange}
             onKeyDown={handleSubmit}
-            type={inputDisplay}
+            type={'text'}
+            // The following is two way binding
+            value={playerName}
+            required
           />
         )}
         <span className="player-symbol">{playerSymbol}</span>
       </span>
-      <button onClick={handleClick}>{!isEditing ? 'Edit' : 'Save'}</button>
+      <button onClick={handleEditClick}>{!isEditing ? 'Edit' : 'Save'}</button>
     </li>
   );
 }
