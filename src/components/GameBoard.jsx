@@ -6,30 +6,42 @@ const initialGameBoard = [
   [null, null, null],
 ];
 
-export default function GameBoard({ changePlayer, currentPlayer }) {
+export default function GameBoard({ updateActivePlayer, currentPlayerSymbol }) {
   const [gameBoard, setGameBoard] = useState(initialGameBoard);
 
-  function handleCellClick(index, cellIndex) {
-    const currentGameBoard = [...gameBoard];
-    currentGameBoard[index][cellIndex] = currentPlayer;
+  function handleCellClick(rowIndex, colIndex) {
+    updateActivePlayer();
 
-    setGameBoard(currentGameBoard);
-    console.log(gameBoard);
+    setGameBoard((previousGameBoard) => {
+      // Since our array's elements are themselves arrays, the following creates a deep copy
+      //-- That is, not only do we spread the parent array to the new copy, we spread each sub array
+      //-- This ensures that the final copy is a true copy, and neither the parent array, nor the children arrays,
+      //--- are just referencing the original array.
+      const updatedGameBoard = [
+        ...previousGameBoard.map((innerArray) => [...innerArray]),
+      ];
+      updatedGameBoard[rowIndex][colIndex] = currentPlayerSymbol;
+
+      return updatedGameBoard;
+    });
   }
 
   return (
     <ol id="game-board">
-      {gameBoard.map((row, index) => {
+      {gameBoard.map((row, rowIndex) => {
         return (
-          <li key={index}>
+          <li key={rowIndex}>
             <ol>
-              {row.map((cell, cellIndex) => {
+              {row.map((cell, colIndex) => {
                 return (
-                  <li key={cellIndex}>
+                  <li key={colIndex}>
                     <button
-                      onClick={() => {
-                        handleCellClick(index, cellIndex);
-                        changePlayer();
+                      onClick={(e) => {
+                        {
+                          if (!e.target.textContent) {
+                            handleCellClick(rowIndex, colIndex);
+                          }
+                        }
                       }}
                     >
                       {cell}

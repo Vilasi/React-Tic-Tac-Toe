@@ -5,16 +5,11 @@ import Player from './components/Player';
 import GameBoard from './components/GameBoard';
 
 function App() {
+  // This state is lifted for the child components Player & GameBoard
   const [currentPlayer, setCurrentPlayer] = useState('X');
 
-  function changePlayerHandler() {
-    console.log(currentPlayer);
-    if (currentPlayer === 'X') {
-      setCurrentPlayer('O');
-    }
-    if (currentPlayer === 'O') {
-      setCurrentPlayer('X');
-    }
+  function handleSelectSquare() {
+    setCurrentPlayer((currentPlayer) => (currentPlayer === 'X' ? 'O' : 'X'));
   }
 
   return (
@@ -33,8 +28,8 @@ function App() {
           />
         </ol>
         <GameBoard
-          changePlayer={changePlayerHandler}
-          currentPlayer={currentPlayer}
+          updateActivePlayer={handleSelectSquare}
+          currentPlayerSymbol={currentPlayer}
         />
       </div>
       Log
