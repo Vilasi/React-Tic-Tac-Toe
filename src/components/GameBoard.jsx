@@ -6,25 +6,25 @@ const initialGameBoard = [
   [null, null, null],
 ];
 
-export default function GameBoard({ updateActivePlayer, currentPlayerSymbol }) {
-  const [gameBoard, setGameBoard] = useState(initialGameBoard);
+export default function GameBoard({ onSelectSquare, turns }) {
+  let gameBoard = initialGameBoard;
 
-  function handleCellClick(rowIndex, colIndex) {
-    updateActivePlayer();
+  for (const turn of turns) {
+    const row = turn.square.row;
+    const col = turn.square.col;
+    const player = turn.player;
 
-    setGameBoard((previousGameBoard) => {
-      // Since our array's elements are themselves arrays, the following creates a deep copy
-      //-- That is, not only do we spread the parent array to the new copy, we spread each sub array
-      //-- This ensures that the final copy is a true copy, and neither the parent array, nor the children arrays,
-      //--- are just referencing the original array.
-      const updatedGameBoard = [
-        ...previousGameBoard.map((innerArray) => [...innerArray]),
-      ];
-      updatedGameBoard[rowIndex][colIndex] = currentPlayerSymbol;
-
-      return updatedGameBoard;
-    });
+    gameBoard[row][col] = player;
   }
+
+  // function handleCellClick(rowIndex, colIndex) {
+  // updateGameBoard(rowIndex, colIndex);
+  // updateActivePlayer();
+  // }
+
+  // turns.forEach((turn) => {
+
+  // });
 
   return (
     <ol id="game-board">
@@ -32,19 +32,17 @@ export default function GameBoard({ updateActivePlayer, currentPlayerSymbol }) {
         return (
           <li key={rowIndex}>
             <ol>
-              {row.map((cell, colIndex) => {
+              {row.map((playerSymbol, colIndex) => {
                 return (
                   <li key={colIndex}>
                     <button
                       onClick={(e) => {
-                        {
-                          if (!e.target.textContent) {
-                            handleCellClick(rowIndex, colIndex);
-                          }
+                        if (!e.target.textContent) {
+                          onSelectSquare(rowIndex, colIndex);
                         }
                       }}
                     >
-                      {cell}
+                      {playerSymbol}
                     </button>
                   </li>
                 );
