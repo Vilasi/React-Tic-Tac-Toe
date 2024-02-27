@@ -1,21 +1,5 @@
-import { useState } from 'react';
-
-const initialGameBoard = [
-  [null, null, null],
-  [null, null, null],
-  [null, null, null],
-];
-
-export default function GameBoard({ onSelectSquare, turns }) {
-  let gameBoard = initialGameBoard;
-
-  for (const turn of turns) {
-    const row = turn.square.row;
-    const col = turn.square.col;
-    const player = turn.player;
-
-    gameBoard[row][col] = player;
-  }
+export default function GameBoard({ onSelectSquare, gameBoard }) {
+  // console.log(gameBoard);
 
   // function handleCellClick(rowIndex, colIndex) {
   // updateGameBoard(rowIndex, colIndex);
