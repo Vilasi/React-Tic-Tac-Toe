@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 //? Import Components
 import Player from './components/Player';
 import GameBoard from './components/GameBoard';
 import Log from './components/Log';
+import GameOver from './components/GameOver';
 
 //? Import Data
 import { WINNING_COMBINATIONS } from './data/WinningCombinations';
@@ -27,7 +28,8 @@ const initialGameBoard = [
 //! Begin App Component
 function App() {
   const [gameTurns, setGameTurns] = useState([]);
-  // const [hasWinner, setHasWinner] = useState(false)
+  const [hasWinner, setHasWinner] = useState(false);
+  const [gameResult, setGameResult] = useState(null);
 
   function handleSelectSquare(rowIndex, colIndex) {
     setGameTurns((previousTurns) => {
@@ -45,11 +47,13 @@ function App() {
     });
   }
 
+  console.log(gameTurns);
+
   // This derives the player symbol from gameTurns state for use in Player
   const currentPlayerSymbol = deriveActivePlayer(gameTurns);
 
   // Initialize the game board with the initialGameBoard state
-  let gameBoard = initialGameBoard;
+  let gameBoard = [...initialGameBoard].map((row) => [...row]);
 
   // Iterate over each turn in the gameTurns state
   for (const turn of gameTurns) {
@@ -82,11 +86,11 @@ function App() {
       yWins = winningMoves.every((move) => move === 'O');
 
       if (xWins) {
-        return 'X won';
+        return 'X Has Won!';
       }
 
       if (yWins) {
-        return 'O won';
+        return 'O Has Won!';
       }
     }
   }
@@ -103,15 +107,31 @@ function App() {
     });
   });
 
-  // If there's no winner and the game is a draw, log 'Draw'
-  if (!winner && draw) {
-    console.log('Draw');
-    // If there's a winner and the game is not a draw, log the winner
-  } else if (winner && !draw) {
-    console.log(winner);
-    // If there's a winner and the game board is fully filled, log the winner
-  } else if (winner && draw) {
-    console.log(winner);
+  // let gameResult;
+
+  useEffect(() => {
+    if (!winner && draw) {
+      console.log('Draw');
+      setHasWinner((previousState) => !previousState);
+      setGameResult('Draw');
+    }
+    if (winner && !draw) {
+      setHasWinner((previousState) => !previousState);
+      // gameResult = winner;
+      setGameResult(winner);
+    }
+    if (winner && draw) {
+      setHasWinner((previousState) => !previousState);
+      setGameResult(winner);
+      console.log(winner);
+      // gameResult = winner;
+    }
+  }, [winner, draw]);
+
+  function handleRematch() {
+    setGameTurns([]);
+    setHasWinner((previousState) => !previousState);
+    setGameResult(null);
   }
 
   return (
@@ -130,10 +150,14 @@ function App() {
           />
         </ol>
         <GameBoard
-          gameBoard={gameBoard}
+          gameOver={hasWinner}
+          board={gameBoard}
           turns={gameTurns}
           onSelectSquare={handleSelectSquare}
         />
+        {hasWinner ? (
+          <GameOver winner={gameResult} rematch={handleRematch} />
+        ) : null}
       </div>
       <Log turns={gameTurns} />
     </main>
