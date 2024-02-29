@@ -19,7 +19,7 @@
  * @returns {JSX.Element} The GameBoard component.
  */
 
-export default function GameBoard({ onSelectSquare, board }) {
+export default function GameBoard({ onSelectSquare, board, gameOver }) {
   return (
     <ol id="game-board">
       {/* Map over each row in the board array */}
@@ -33,7 +33,7 @@ export default function GameBoard({ onSelectSquare, board }) {
                   <li key={colIndex}>
                     <button
                       onClick={() => onSelectSquare(rowIndex, colIndex)}
-                      disabled={playerSymbol !== null || !gameOver}
+                      disabled={playerSymbol !== null || gameOver}
                     >
                       {/* Display the player's symbol ('X' or 'O', or 'null') */}
                       {playerSymbol}

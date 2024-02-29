@@ -9,6 +9,19 @@ import GameOver from './components/GameOver';
 //? Import Data
 import { WINNING_COMBINATIONS } from './data/WinningCombinations';
 
+//! Initial Constants
+const PLAYERS = {
+  X: 'Player 1',
+  O: 'Player 2',
+};
+
+const INITIAL_GAME_BOARD = [
+  [null, null, null],
+  [null, null, null],
+  [null, null, null],
+];
+
+//! Helper functions ------------------------------------------------------------------------------------------------------------
 //? Helper function for deriving current player
 function deriveActivePlayer(gameTurns) {
   let currentPlayer = 'X';
@@ -19,14 +32,52 @@ function deriveActivePlayer(gameTurns) {
   return currentPlayer;
 }
 
-const initialGameBoard = [
-  [null, null, null],
-  [null, null, null],
-  [null, null, null],
-];
+//? Define a function to moderate the game - determining who won
+function gameModerator(gameBoard) {
+  // Initialize variables to track if 'X' or 'O' has won
+  let xWins = false;
+  let yWins = false;
 
-//! Begin App Component
+  // Iterate over each winning combination
+  for (let combination of WINNING_COMBINATIONS) {
+    // Map the combination to the corresponding moves on the game board
+    const winningMoves = combination.map((cell) => {
+      return gameBoard[cell.row][cell.column];
+    });
+
+    // Check if all moves in the winningMoves are 'X' or 'O'
+    xWins = winningMoves.every((move) => move === 'X');
+    yWins = winningMoves.every((move) => move === 'O');
+
+    if (xWins) {
+      return 'X';
+    }
+
+    if (yWins) {
+      return 'O';
+    }
+  }
+}
+
+//? This function iterates over each turn in the gameTurns state and derives the new gameBoard from the initial gameBoard state
+function deriveGameBoard(gameTurns, gameBoard) {
+  for (const turn of gameTurns) {
+    // Extract the row and column from the turn's square
+    const row = turn.square.row;
+    const col = turn.square.col;
+
+    // Extract the player from the turn
+    const player = turn.player;
+
+    // Update the game board at the row and column with the player's symbol
+    gameBoard[row][col] = player;
+  }
+  return gameBoard;
+}
+
+//! Begin App Component -------------------------------------------------------------------------------------------------------------------
 function App() {
+  const [players, setPlayers] = useState(PLAYERS);
   const [gameTurns, setGameTurns] = useState([]);
   const [hasWinner, setHasWinner] = useState(false);
   const [gameResult, setGameResult] = useState(null);
@@ -47,71 +98,26 @@ function App() {
     });
   }
 
-  console.log(gameTurns);
-
   // This derives the player symbol from gameTurns state for use in Player
   const currentPlayerSymbol = deriveActivePlayer(gameTurns);
 
-  // Initialize the game board with the initialGameBoard state
-  let gameBoard = [...initialGameBoard].map((row) => [...row]);
+  // Initialize the game board with the INITIAL_GAME_BOARD state
+  let gameBoard = [...INITIAL_GAME_BOARD].map((row) => [...row]);
 
-  // Iterate over each turn in the gameTurns state
-  for (const turn of gameTurns) {
-    // Extract the row and column from the turn's square
-    const row = turn.square.row;
-    const col = turn.square.col;
+  // Call deriveGameBoard function to build the updated gameBoard from gameTurns object array
+  gameBoard = deriveGameBoard(gameTurns, gameBoard);
 
-    // Extract the player from the turn
-    const player = turn.player;
-
-    // Update the game board at the row and column with the player's symbol
-    gameBoard[row][col] = player;
-  }
-
-  //? Define a function to moderate the game
-  function gameModerator() {
-    // Initialize variables to track if 'X' or 'O' has won
-    let xWins = false;
-    let yWins = false;
-
-    // Iterate over each winning combination
-    for (let combination of WINNING_COMBINATIONS) {
-      // Map the combination to the corresponding moves on the game board
-      const winningMoves = combination.map((cell) => {
-        return gameBoard[cell.row][cell.column];
-      });
-
-      // Check if all moves in the winningMoves are 'X' or 'O'
-      xWins = winningMoves.every((move) => move === 'X');
-      yWins = winningMoves.every((move) => move === 'O');
-
-      if (xWins) {
-        return 'X Has Won!';
-      }
-
-      if (yWins) {
-        return 'O Has Won!';
-      }
-    }
-  }
   // Call the gameModerator function to check if there's a winner
-  let winner = gameModerator();
+  let winner = gameModerator(gameBoard);
 
   // Initialize a variable to track if the game is a draw
   let draw = false;
 
-  //? Determine if every square on the board is filled
-  draw = gameBoard.every((column) => {
-    return column.every((square) => {
-      return square !== null;
-    });
-  });
-
-  // let gameResult;
+  //? Determine if every square on the board is filled and there is no winner
+  draw = gameTurns.length === 9 && !winner;
 
   useEffect(() => {
     if (!winner && draw) {
-      console.log('Draw');
       setHasWinner((previousState) => !previousState);
       setGameResult('Draw');
     }
@@ -123,8 +129,6 @@ function App() {
     if (winner && draw) {
       setHasWinner((previousState) => !previousState);
       setGameResult(winner);
-      console.log(winner);
-      // gameResult = winner;
     }
   }, [winner, draw]);
 
@@ -134,17 +138,28 @@ function App() {
     setGameResult(null);
   }
 
+  function handlePlayerNameChange(symbol, newName) {
+    setPlayers((previousPlayerNames) => {
+      return {
+        ...previousPlayerNames,
+        [symbol]: newName,
+      };
+    });
+  }
+
   return (
     <main>
       <div id="game-container">
         <ol id="players" className="highlight-player">
           <Player
-            name={'Player 1'}
+            onNameChange={handlePlayerNameChange}
+            name={PLAYERS.X}
             playerSymbol={'X'}
             isActive={currentPlayerSymbol === 'X'}
           />
           <Player
-            name={'Player 2'}
+            onNameChange={handlePlayerNameChange}
+            name={PLAYERS.O}
             playerSymbol={'O'}
             isActive={currentPlayerSymbol === 'O'}
           />
@@ -156,7 +171,11 @@ function App() {
           onSelectSquare={handleSelectSquare}
         />
         {hasWinner ? (
-          <GameOver winner={gameResult} rematch={handleRematch} />
+          <GameOver
+            playerNames={players}
+            winner={gameResult}
+            onRestart={handleRematch}
+          />
         ) : null}
       </div>
       <Log turns={gameTurns} />

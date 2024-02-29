@@ -3,7 +3,7 @@ import { useState } from 'react';
 //? Import CSS
 import './Player.css';
 
-export default function Player({ name, playerSymbol, isActive }) {
+export default function Player({ name, playerSymbol, isActive, onNameChange }) {
   const [playerName, setPlayerName] = useState(name);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -14,12 +14,14 @@ export default function Player({ name, playerSymbol, isActive }) {
     //--React will call this callback function and get the original state value
     //----**This is a good idea because useState is async**
     setIsEditing(() => !isEditing);
+    onNameChange(playerSymbol, playerName);
   }
 
   //? Input Enter Key Submit functionality
   function handleSubmit(e) {
     if (e.key === 'Enter') {
       setIsEditing(false);
+      onNameChange(playerSymbol, playerName);
     }
   }
 

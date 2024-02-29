@@ -1,9 +1,9 @@
-export default function GameOver({ winner, rematch }) {
+export default function GameOver({ winner, onRestart, playerNames }) {
   return (
     <div id="game-over">
       <h2>Game Over!</h2>
-      <p>{winner}</p>
-      <button onClick={() => rematch()}>Rematch!</button>
+      <p>{winner !== 'Draw' ? `${playerNames[winner]} has won!` : winner}</p>
+      <button onClick={() => onRestart()}>Rematch!</button>
     </div>
   );
 }
